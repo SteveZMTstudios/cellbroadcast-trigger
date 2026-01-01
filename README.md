@@ -6,6 +6,10 @@ This is a testing tool for simulating and triggering Wireless Emergency Alerts (
 
 This application uses root privileges to call hidden APIs at the Android system level, directly sending fake cell broadcast messages to the system broadcast receiver. This is extremely useful for testing the phone's alarm reception capabilities, UI display, and for developing and debugging related applications.
 
+## Real World Usage
+It found a real [android design bugs](https://issuetracker.google.com/issues/472754120).
+
+
 ### Compilation Environment
 
 * **JDK**: Java 11 or later (project configured with `sourceCompatibility = JavaVersion.VERSION_11`).
