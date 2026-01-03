@@ -48,6 +48,7 @@
 
     <string name="google_alerts_section">Google Play 服务警报</string>
     <string name="google_earthquake_button">触发 Google 地震预警演示</string>
+    <string name="google_earthquake_settings_button">Google 地震预警设置</string>
     <string name="google_earthquake_desc">尝试启动 Google Play 服务内置的地震预警演示界面。</string>
     
     <string name="about_button">关于</string>
@@ -63,7 +64,7 @@
 
     <string name="xposed_error_title">Xposed 模块未激活</string>
     <string name="xposed_error_message">此功能需要激活 Xposed 模块才能工作。\n\n请在 LSPosed/EdXposed 管理器中勾选本应用，并确保作用域包含 "Google Play 服务" (com.google.android.gms)，然后重启手机。</string>
-    <string name="xposed_error_confirm">我知道了</string>
+    <string name="xposed_error_confirm">确定</string>
 
     <string name="alert_params_title">警报参数配置</string>
     <string name="alert_params_desc">配置模拟地震的详细参数，这些值将直接注入到 GMS 的 EAlertUxArgs 对象中：\n\n• 地区名称 (字段 o)：显示在警报标题中。\n• 经纬度 (字段 b)：设定震中位置。\n• 距离 (字段 e)：模拟设备与震中的距离。\n• 震感半径：用于生成地图上的红色/黄色多边形区域 (字段 f/l)。</string>
@@ -77,4 +78,11 @@
     <string name="trigger_gms_xposed_button">触发 GMS 警报 (Xposed)</string>
     <string name="xposed_required_hint">需要在 GMS (Google Play 服务) 作用域内激活 Xposed 模块。</string>
     <string name="simulate_real_alert_label">模拟真实警报 (去除"演习"标识)</string>
+    <string name="confirm_trigger_title">确认触发</string>
+    <string name="confirm_trigger_message">您即将触发紧急警报。这会播放响亮且独特的警报音效。\n\n请确保：\n1. 您处于私人环境中。\n2. 周围的人已知晓这是在进行测试。</string>
+    <string name="confirm_trigger_button">确认并触发</string>
+    <string name="confirm_trigger_cancel">取消</string>
+    <string name="full_simulation_button">全系统模拟 (WEA + ETWS + GMS)</string>
+    <string name="full_simulation_desc">模拟真实地震发生时，多个预警系统同时触发的情景。将同时发送无线紧急警报 (WEA)、地震海啸警报 (ETWS) 和 Google 地震预警。</string>
+    <string name="full_simulation_message">[测试警报]【紧急地震预警】测试省测试县测试乡将于1970年1月1日7时0分发生6.8级地震，震源深度20公里，震中37.7749°N、-122.4194°E，震感半径100km。室内伏地、遮挡、手抓牢，躲于桌下或墙角，远离窗户和重物；户外前往空旷处，远离高楼、电线杆、广告牌。应急电话112，测试省地震局 02112345678，example.com [测试警报]</string>
 </resources>

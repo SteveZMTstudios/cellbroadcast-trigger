@@ -5,10 +5,14 @@
 这是一个用于在 Android 设备上模拟和触发无线紧急警报 (Wireless Emergency Alerts, WEA) 和地震海啸预警系统 (ETWS) 的测试工具。
 
 本应用通过 Root 权限调用 Android 系统底层的隐藏 API，直接向系统广播接收器发送伪造的小区广播消息。这对于测试手机的警报接收功能、UI 展示以及相关应用的开发调试非常有用。
+
+### 为什么我们要做这个
+严重的自然灾害会造成巨大的人员伤亡和财产损失。及时准确地向公众发布并确保公众第一时间获取紧急警报信息，能够有效减少灾害带来的损失，保护用户的生命财产安全。
+为推动小区广播和无线警报技术的应用，我们开发了这个工具，帮助开发者和测试人员模拟客户端的各种紧急警报场景，验证设备和应用的响应能力。
  
 ### 编译环境
 
-*   **JDK**: Java 11 或更高版本 (项目配置为 `sourceCompatibility = JavaVersion.VERSION_11`)。
+*   **JDK**: Java 11 或更高版本 (项目配置为 `sourceCompatibility = JavaVersion.VERSION_11`，开发者的电脑使用的是 JDK 21)。
 *   **Android SDK**:
     *   `compileSdk`: 36
     *   `minSdk`: 21 (Android 5.0)
@@ -40,14 +44,15 @@
 ### 前置条件
 *   您的 Android 设备必须**已获取 Root 权限** (Magisk, KernelSU, APatch 等)。
 *   授予应用 Root 权限（首次点击 "TRIGGER ALERT" 时会请求）。
-
+*   若要运行完整测试，需在 Xposed 管理器配置作用域以启用 Google Play 服务警报功能。
+ 
 ### App 端使用
 1.  打开应用。
 2.  输入警报消息内容。
 3.  选择警报等级（如 "Presidential" 或 "ETWS: Earthquake"）。
 4.  (可选) 设置延迟时间。
-5.  点击 **"TRIGGER ALERT (ROOT)"** 按钮。
-6.  观察手机是否弹出系统级警报弹窗。
+5.  点击 **"TRIGGER ALERT (ROOT)"** 按钮，或下拉展开点击 **“完整模拟”**。
+6.  观察手机是否弹出系统级警报弹窗，以及它们是否按预期工作。
 
 ### Google Play 服务 (GMS) 地震预警 (Xposed)
 

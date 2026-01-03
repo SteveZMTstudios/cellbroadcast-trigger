@@ -6,13 +6,15 @@ This is a testing tool for simulating and triggering Wireless Emergency Alerts (
 
 This application uses root privileges to call hidden APIs at the Android system level, directly sending fake cell broadcast messages to the system broadcast receiver. This is extremely useful for testing the phone's alarm reception capabilities, UI display, and for developing and debugging related applications.
 
-## Real World Usage
-It found a real [android design bugs](https://issuetracker.google.com/issues/472754120).
+## Why We Do This
+Severe natural disasters can cause significant loss of life and property. Timely and accurate dissemination of emergency alerts to the public, ensuring that they receive the information as quickly as possible, can effectively reduce the damage caused by disasters and protect the safety of users' lives and property.
+To promote the application of cell broadcast and wireless alert technologies, we developed this tool to help developers and testers simulate various emergency alert scenarios on the client side, verifying the responsiveness of devices and applications.
+
 
 
 ### Compilation Environment
 
-* **JDK**: Java 11 or later (project configured with `sourceCompatibility = JavaVersion.VERSION_11`).
+* **JDK**: Java 11 or later (project configured with `sourceCompatibility = JavaVersion.VERSION_11`, developer's computer uses JDK 21).
 
 * **Android SDK**:
 
@@ -59,6 +61,8 @@ For detailed test cases and troubleshooting, see the [Testing Guide](TESTING.md)
 
 * Grant the application root access (requested the first time you tap "TRIGGER ALERT").
 
+* If you want to run the full tests, you need to configure the scope in the Xposed manager to enable Google Play Services alert functionality.
+
 ### App Usage
 
 1. Open the application.
@@ -69,8 +73,7 @@ For detailed test cases and troubleshooting, see the [Testing Guide](TESTING.md)
 
 4. (Optional) Set the delay time.
 
-5. Click the **"TRIGGER ALERT (ROOT)"** button.
-
+5. Click the **"TRIGGER ALERT (ROOT)"** button, or slide down and click **"Full Simulation"**.
 6. Observe whether the phone displays a system-level alert pop-up.
 
 ### Google Play Services (GMS) Earthquake Alerts (Xposed)

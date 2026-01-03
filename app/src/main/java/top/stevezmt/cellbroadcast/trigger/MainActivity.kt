@@ -87,6 +87,10 @@ fun MainScreen(modifier: Modifier = Modifier) {
     // Xposed Error Dialog
     var showXposedErrorDialog by remember { mutableStateOf(false) }
 
+    // Trigger Confirmation Dialog
+    var showConfirmTriggerDialog by remember { mutableStateOf(false) }
+    var pendingTriggerAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -132,6 +136,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
             title = { Text(stringResource(R.string.about_title)) },
             text = {
                 Column {
+                    Text(stringResource(R.string.app_name))
                     Text(stringResource(R.string.about_version, BuildConfig.VERSION_NAME))
                     Spacer(modifier = Modifier.height(4.dp))
                     Text("Xposed Status: ${if (isXposedActive) "Active" else "Inactive"}", 
@@ -185,6 +190,34 @@ fun MainScreen(modifier: Modifier = Modifier) {
             confirmButton = {
                 Button(onClick = { showXposedErrorDialog = false }) {
                     Text(stringResource(R.string.xposed_error_confirm))
+                }
+            }
+        )
+    }
+
+    if (showConfirmTriggerDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmTriggerDialog = false },
+            title = { Text(stringResource(R.string.confirm_trigger_title)) },
+            text = { Text(stringResource(R.string.confirm_trigger_message)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        pendingTriggerAction?.invoke()
+                        pendingTriggerAction = null
+                        showConfirmTriggerDialog = false
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text(stringResource(R.string.confirm_trigger_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    pendingTriggerAction = null
+                    showConfirmTriggerDialog = false 
+                }) {
+                    Text(stringResource(R.string.confirm_trigger_cancel))
                 }
             }
         )
@@ -338,31 +371,34 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
         Button(
             onClick = {
-                scope.launch {
-                    logs += logStarting
-                    val delayMs = (delaySeconds.toLongOrNull() ?: 0) * 1000
-                    val selectedValue = levels[selectedLevelIndex].second
-                    val isEtws = selectedValue >= 0x10
-                    val level = if (isEtws) (selectedValue - 0x10) else selectedValue
-                    
-                    val finalBody = if (messageBody.isEmpty()) context.getString(R.string.default_message) else messageBody
-                    
-                    val adv = mapOf(
-                        "serial" to (serialNumber.toIntOrNull() ?: 1234),
-                        "category" to (customCategory.toIntOrNull() ?: -1),
-                        "priority" to (priority.toIntOrNull() ?: 3),
-                        "scope" to (geoScope.toIntOrNull() ?: 3),
-                        "dcs" to (dcs.toIntOrNull() ?: 0),
-                        "slot" to (slotIndex.toIntOrNull() ?: 0),
-                        "language" to languageCode
-                    )
+                pendingTriggerAction = {
+                    scope.launch {
+                        logs += logStarting
+                        val delayMs = (delaySeconds.toLongOrNull() ?: 0) * 1000
+                        val selectedValue = levels[selectedLevelIndex].second
+                        val isEtws = selectedValue >= 0x10
+                        val level = if (isEtws) (selectedValue - 0x10) else selectedValue
+                        
+                        val finalBody = if (messageBody.isEmpty()) context.getString(R.string.default_message) else messageBody
+                        
+                        val adv = mapOf(
+                            "serial" to (serialNumber.toIntOrNull() ?: 1234),
+                            "category" to (customCategory.toIntOrNull() ?: -1),
+                            "priority" to (priority.toIntOrNull() ?: 3),
+                            "scope" to (geoScope.toIntOrNull() ?: 3),
+                            "dcs" to (dcs.toIntOrNull() ?: 0),
+                            "slot" to (slotIndex.toIntOrNull() ?: 0),
+                            "language" to languageCode
+                        )
 
-                    triggerAlert(context, finalBody, level, delayMs, isEtws, adv, 
-                        onRootError = { showRootErrorDialog = true }
-                    ) { newLog ->
-                        logs += newLog
+                        triggerAlert(context, finalBody, level, delayMs, isEtws, adv, 
+                            onRootError = { showRootErrorDialog = true }
+                        ) { newLog ->
+                            logs += newLog
+                        }
                     }
                 }
+                showConfirmTriggerDialog = true
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -396,17 +432,20 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     
                     Button(
                         onClick = {
-                            scope.launch {
-                                logs += "Launching Google Earthquake Demo (via Xposed)...\n"
-                                // Use Xposed to trigger the demo properly with the required Args object
-                                val intent = android.content.Intent("top.stevezmt.trigger.ACTION_REAL_ALERT")
-                                intent.setPackage("com.google.android.gms")
-                                intent.putExtra("is_test", true)
-                                intent.putExtra("ux_extra", "EALERT_DEMO")
-                                intent.putExtra("event_id", "Demo Simulation")
-                                context.sendBroadcast(intent)
-                                logs += "Broadcast sent to GMS. Check Xposed logs.\n"
+                            pendingTriggerAction = {
+                                scope.launch {
+                                    logs += "Launching Google Earthquake Demo (via Xposed)...\n"
+                                    // Use Xposed to trigger the demo properly with the required Args object
+                                    val intent = android.content.Intent("top.stevezmt.trigger.ACTION_REAL_ALERT")
+                                    intent.setPackage("com.google.android.gms")
+                                    intent.putExtra("is_test", true)
+                                    intent.putExtra("ux_extra", "EALERT_DEMO")
+                                    intent.putExtra("event_id", "Demo Simulation")
+                                    context.sendBroadcast(intent)
+                                    logs += "Broadcast sent to GMS. Check Xposed logs.\n"
+                                }
                             }
+                            showConfirmTriggerDialog = true
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -432,7 +471,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("GMS Earthquake Settings")
+                        Text(stringResource(R.string.google_earthquake_settings_button))
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -516,43 +555,46 @@ fun MainScreen(modifier: Modifier = Modifier) {
                                 showXposedErrorDialog = true
                                 return@Button
                             }
-                            scope.launch {
-                                val delayMs = (delaySeconds.toLongOrNull() ?: 0) * 1000
-                                if (delayMs > 0) {
-                                    logs += "Waiting ${delaySeconds}s before triggering...\n"
-                                    kotlinx.coroutines.delay(delayMs)
+                            pendingTriggerAction = {
+                                scope.launch {
+                                    val delayMs = (delaySeconds.toLongOrNull() ?: 0) * 1000
+                                    if (delayMs > 0) {
+                                        logs += "Waiting ${delaySeconds}s before triggering...\n"
+                                        kotlinx.coroutines.delay(delayMs)
+                                    }
+                                    logs += "Triggering GMS Alert via Xposed Bridge...\n"
+                                    // Send broadcast to Xposed module in GMS
+                                    val intent = android.content.Intent("top.stevezmt.trigger.ACTION_REAL_ALERT")
+                                    intent.setPackage("com.google.android.gms")
+                                    intent.putExtra("is_test", !isGmsRealAlert)
+                                    intent.putExtra("magnitude", gmsMagnitude.toDoubleOrNull() ?: 5.6)
+                                    intent.putExtra("event_id", if (isGmsRealAlert) "Real Simulation" else "Test Simulation")
+                                    
+                                    // Pass parameters
+                                    intent.putExtra("region_name", regionName)
+                                    intent.putExtra("lat", latitude.toDoubleOrNull() ?: 37.7749)
+                                    intent.putExtra("lng", longitude.toDoubleOrNull() ?: -122.4194)
+                                    intent.putExtra("distance", distanceKm.toDoubleOrNull() ?: 10.5)
+                                    intent.putExtra("polygon_radius", polygonRadiusKm.toDoubleOrNull() ?: 50.0)
+                                    
+                                    // Hardcoded working values for Real Alert
+                                    intent.putExtra("override_k", 5) // Must be 5 for EALERT_DISPLAY
+                                    intent.putExtra("override_n", alertType.toIntOrNull() ?: 1)
+                                    intent.putExtra("override_m", 2)
+                                    
+                                    // If it's a test, we MUST provide EALERT_DEMO to trigger the demo UI.
+                                    // If it's real, we MUST provide EALERT_DISPLAY to trigger the real UI.
+                                    if (!isGmsRealAlert) {
+                                        intent.putExtra("ux_extra", "EALERT_DEMO")
+                                    } else {
+                                        intent.putExtra("ux_extra", "EALERT_DISPLAY")
+                                    }
+                                    
+                                    context.sendBroadcast(intent)
+                                    logs += "Broadcast sent to GMS. Check Xposed logs if nothing happens.\n"
                                 }
-                                logs += "Triggering GMS Alert via Xposed Bridge...\n"
-                                // Send broadcast to Xposed module in GMS
-                                val intent = android.content.Intent("top.stevezmt.trigger.ACTION_REAL_ALERT")
-                                intent.setPackage("com.google.android.gms")
-                                intent.putExtra("is_test", !isGmsRealAlert)
-                                intent.putExtra("magnitude", gmsMagnitude.toDoubleOrNull() ?: 5.6)
-                                intent.putExtra("event_id", if (isGmsRealAlert) "Real Simulation" else "Test Simulation")
-                                
-                                // Pass parameters
-                                intent.putExtra("region_name", regionName)
-                                intent.putExtra("lat", latitude.toDoubleOrNull() ?: 37.7749)
-                                intent.putExtra("lng", longitude.toDoubleOrNull() ?: -122.4194)
-                                intent.putExtra("distance", distanceKm.toDoubleOrNull() ?: 10.5)
-                                intent.putExtra("polygon_radius", polygonRadiusKm.toDoubleOrNull() ?: 50.0)
-                                
-                                // Hardcoded working values for Real Alert
-                                intent.putExtra("override_k", 5) // Must be 5 for EALERT_DISPLAY
-                                intent.putExtra("override_n", alertType.toIntOrNull() ?: 1)
-                                intent.putExtra("override_m", 2)
-                                
-                                // If it's a test, we MUST provide EALERT_DEMO to trigger the demo UI.
-                                // If it's real, we MUST provide EALERT_DISPLAY to trigger the real UI.
-                                if (!isGmsRealAlert) {
-                                    intent.putExtra("ux_extra", "EALERT_DEMO")
-                                } else {
-                                    intent.putExtra("ux_extra", "EALERT_DISPLAY")
-                                }
-                                
-                                context.sendBroadcast(intent)
-                                logs += "Broadcast sent to GMS. Check Xposed logs if nothing happens.\n"
                             }
+                            showConfirmTriggerDialog = true
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -561,6 +603,104 @@ fun MainScreen(modifier: Modifier = Modifier) {
                     Text(stringResource(R.string.xposed_required_hint), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(horizontal = 4.dp))
                 }
             }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(stringResource(R.string.full_simulation_button), style = MaterialTheme.typography.titleMedium)
+        Text(
+            stringResource(R.string.full_simulation_desc),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+
+        val fullSimMessage = stringResource(R.string.full_simulation_message)
+        Button(
+            onClick = {
+                if (!isXposedActive) {
+                    showXposedErrorDialog = true
+                    return@Button
+                }
+                
+                pendingTriggerAction = {
+                    scope.launch {
+                        // Pre-check Root
+                        val hasRoot = withContext(Dispatchers.IO) {
+                            try {
+                                val process = Runtime.getRuntime().exec(arrayOf("su", "-c", "id"))
+                                process.waitFor() == 0
+                            } catch (e: Exception) {
+                                false
+                            }
+                        }
+                        
+                        if (!hasRoot) {
+                            showRootErrorDialog = true
+                            return@launch
+                        }
+
+                        val delayMs = (delaySeconds.toLongOrNull() ?: 0) * 1000
+                        if (delayMs > 0) {
+                            logs += "Waiting ${delaySeconds}s before full simulation...\n"
+                            kotlinx.coroutines.delay(delayMs)
+                        }
+                        
+                        logs += "Starting Full Simulation (WEA + ETWS + GMS) in parallel...\n"
+                        
+                        val advParams = mapOf(
+                            "serial" to serialNumber,
+                            "category" to (if (customCategory.isEmpty()) -1 else customCategory.toIntOrNull() ?: -1),
+                            "priority" to (priority.toIntOrNull() ?: 3),
+                            "scope" to (geoScope.toIntOrNull() ?: 3),
+                            "dcs" to (dcs.toIntOrNull() ?: 0),
+                            "slot" to (slotIndex.toIntOrNull() ?: 0),
+                            "language" to languageCode
+                        )
+
+                        // Trigger all in parallel
+                        launch {
+                            logs += " - Triggering WEA (Presidential)...\n"
+                            triggerAlert(context, fullSimMessage, 0, 0, false, advParams, 
+                                onRootError = { showRootErrorDialog = true }) { logs += it }
+                        }
+                        
+                        launch {
+                            logs += " - Triggering ETWS (Earthquake) with 1s delay...\n"
+                            kotlinx.coroutines.delay(1000)
+                            triggerAlert(context, fullSimMessage, 0, 0, true, advParams,
+                                onRootError = { showRootErrorDialog = true }) { logs += it }
+                        }
+                        
+                        launch {
+                            logs += " - Triggering GMS Alert via Xposed...\n"
+                            val intent = android.content.Intent("top.stevezmt.trigger.ACTION_REAL_ALERT")
+                            intent.setPackage("com.google.android.gms")
+                            intent.putExtra("is_test", false)
+                            intent.putExtra("magnitude", 6.8)
+                            intent.putExtra("event_id", "Full Simulation")
+                            intent.putExtra("region_name", "测试省测试县测试乡")
+                            intent.putExtra("lat", 37.7749)
+                            intent.putExtra("lng", -122.4194)
+                            intent.putExtra("distance", 10.5)
+                            intent.putExtra("polygon_radius", 100.0)
+                            intent.putExtra("override_k", 5)
+                            intent.putExtra("override_n", 1)
+                            intent.putExtra("override_m", 2)
+                            intent.putExtra("ux_extra", "EALERT_DISPLAY")
+                            context.sendBroadcast(intent)
+                        }
+                        
+                        logs += "All simulation tasks launched.\n"
+                    }
+                }
+                showConfirmTriggerDialog = true
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+        ) {
+            Text(stringResource(R.string.full_simulation_button))
         }
 
         Spacer(modifier = Modifier.height(8.dp))

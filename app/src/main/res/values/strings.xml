@@ -1,8 +1,8 @@
 <resources>
     <string name="app_name">CellBroadcast Trigger</string>
-    <string name="app_title">Wireless Emergency Alert Trigger</string>
+    <string name="app_title">WEA Trigger</string>
     <string name="alert_message_label">Alert Message</string>
-    <string name="default_message">[THIS IS A TEST 这是演习警报] This is a test Emergency Alert</string>
+    <string name="default_message">[THIS IS A TEST] This is a test Emergency Alert</string>
     <string name="alert_level_label">Alert Level:</string>
     <string name="delay_label">Delay (seconds)</string>
     <string name="trigger_button">TRIGGER ALERT (ROOT)</string>
@@ -46,6 +46,7 @@
     <string name="language_desc">ISO 639-1 language code (e.g., \'en\', \'zh\'). Used for data coding scheme auto-selection if DCS is 0.</string>
 
     <string name="google_alerts_section">Google Play Services Alerts</string>
+    <string name="google_earthquake_settings_button">Google Earthquake Settings</string>
     <string name="google_earthquake_button">Trigger Google Earthquake Demo</string>
     <string name="google_earthquake_desc">Attempts to launch Google Play Services\' internal earthquake alert demo UI.</string>
     
@@ -76,4 +77,11 @@
     <string name="trigger_gms_xposed_button">Trigger GMS Alert (Xposed)</string>
     <string name="xposed_required_hint">Requires Xposed module active in GMS scope.</string>
     <string name="simulate_real_alert_label">Simulate Real Alert (No "Test" Label)</string>
+    <string name="confirm_trigger_title">Confirm</string>
+    <string name="confirm_trigger_message">You are about to trigger a simulated emergency alert. This will play a loud, distinctive alert tone.\n\nPlease ensure:\n1. You are in a private environment.\n2. People around you are aware that this is a test.</string>
+    <string name="confirm_trigger_button">Confirm and Trigger</string>
+    <string name="confirm_trigger_cancel">Cancel</string>
+    <string name="full_simulation_button">Full Simulation (WEA + ETWS + GMS)</string>
+    <string name="full_simulation_desc">Simulates a real-world scenario where multiple alert systems trigger simultaneously. Includes WEA, ETWS, and Google Earthquake Alert.</string>
+    <string name="full_simulation_message">[TEST ALERT]【EARTHQUAKE WARNING】Test Province, Test County, Test Town will experience a 6.8 magnitude earthquake on Jan 1, 1970 at 07:00. Depth: 20km. Epicenter: 37.7749°N, -122.4194°E. Radius: 100km. Indoors: Drop, Cover, Hold on. Outdoors: Move to open area. Emergency: 112. Seismic Bureau: 02112345678. Visit example.com [TEST ALERT]</string>
 </resources>
